@@ -22,9 +22,9 @@ function SillyServer( server, secure )
 
     this.MAX_BUFFER = 100;
     this.buffering = false; //allow to store last messages to resend to new users
-    this.verbose = false;
-    this.allow_read_files = false; //dangerous
-    this.files_folder = null; //set to the folder to server files statically
+    this.verbose = true;
+    this.allow_read_files = true; //dangerous
+    this.files_folder = "../client"; //set to the folder to server files statically
 
     //create HTTP Server
     this.server = server;
@@ -354,24 +354,64 @@ SillyServer.prototype.httpHandler = function(request, response)
 {
     var that = this;
     var path = request.url;
+
     if(this.verbose)
         console.log(" http request: " + path);
 
-    function sendResponse(response,status_code,data)
+    function getContent(pathname){
+        // console.log("Looking fo extension for " + pathname);
+        var i = pathname.lastIndexOf('.');
+        var extension = i<0 ? "": pathname.substr(i);
+        switch (extension){
+            case "":
+                return "application/octet-stream";
+                break;
+            case ".json":
+                return "application/json";
+                break;
+            case ".xml":
+                return "text/plain";
+                break;
+            case ".wasm":
+                return "application/wasm";
+                break;
+            case ".js":
+                return "application/javascript";
+                break;
+            case ".html":
+                return "text/html";
+                break;
+        }
+    }
+    function sendResponse(response,status_code,data,pathname = null)
     {
+        var content = "text/plain";
+        if(pathname)
+            content = getContent(pathname);
         //allow cors
-        response.writeHead(status_code, {'Content-Type': 'text/plain', "Access-Control-Allow-Origin":"*"});
-        if( typeof(data) == "object")
-            response.write( JSON.stringify( data ) );
-        else
+        response.writeHead(status_code, {'Content-Type': content, "Access-Control-Allow-Origin":"*"});
+        // if( typeof(data) == "object")
+        //     response.write( JSON.stringify( data ) );
+        // else
             response.write( data );
         response.end();
     }
 
     var path_info = url.parse(request.url,true);
-
     //data manipulation
-    if(path_info.pathname == "/data")
+    if(path_info.pathname =="/"){
+        // console.log("Returning Index.html");
+        fs.readFile( "../client/index.html", function(err, content) {
+            var status = err ? 404 : 200;
+            if(err){
+                sendResponse(response, 300, "cannot read files");
+            }
+            else{
+                sendResponse(response, status, content,"../client/index.html");
+            }
+        });
+    }
+    else if(path_info.pathname == "/data")
     {
         if(request.method == 'POST')
         {
@@ -485,7 +525,7 @@ SillyServer.prototype.httpHandler = function(request, response)
         if(this.allow_read_files && this.files_folder != null)
             fs.readFile( this.files_folder + path, function(err, content) {
                 var status = err ? 404 : 200;
-                sendResponse(response, status, content || "file not found");
+                sendResponse(response, status, content || "file not found", path);
             });
         else
             sendResponse(response, 300, "cannot read files");

@@ -238,12 +238,12 @@ function opencvIsReady() {
 
     //LOADING PRETRAINED CLASSIFIERS FOR FACE DETECTION
     faceClassifier = new cv.CascadeClassifier();
-    faceClassifier.load('./Resources/haarcascade_frontalface_default.xml');
+    faceClassifier.load('haarcascade_frontalface_default.xml');
 
     profileClassifier = new cv.CascadeClassifier();
-    profileClassifier.load('./Resources/haarcascade_profileface.xml');
+    profileClassifier.load('haarcascade_profileface.xml');
     eyeClassifier = new cv.CascadeClassifier();
-    eyeClassifier.load('./Resources/haarcascade_eye.xml');
+    eyeClassifier.load('haarcascade_eye.xml');
 
     readyOpenCV.innerHTML = "OpenCV is ready";
 
