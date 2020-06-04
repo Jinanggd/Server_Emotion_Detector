@@ -52,7 +52,7 @@ function SillyServer( server, secure )
 }
 
 SillyServer.version = "1.3";
-SillyServer.default_port = 55000;
+SillyServer.default_port = 8080;
 
 SillyServer.prototype.listen = function( port )
 {
@@ -381,6 +381,10 @@ SillyServer.prototype.httpHandler = function(request, response)
             case ".html":
                 return "text/html";
                 break;
+            default:
+                return "text/plain";
+                break;
+
         }
     }
     function sendResponse(response,status_code,data,pathname = null)
@@ -398,16 +402,21 @@ SillyServer.prototype.httpHandler = function(request, response)
     }
 
     var path_info = url.parse(request.url,true);
+    // console.log("DIRNAME: "+ __dirname);
+    // console.log("REQUEST: "+ request);
+    // console.log("URL: " + path);
+    // console.log("PATH INFO: "+ path_info.pathname);
     //data manipulation
     if(path_info.pathname =="/"){
-        // console.log("Returning Index.html");
-        fs.readFile( "../client/index.html", function(err, content) {
+        console.log("Returning Index.html");
+
+        fs.readFile( "index.html", function(err, content) {
             var status = err ? 404 : 200;
             if(err){
-                sendResponse(response, 300, "cannot read files");
+                sendResponse(response, 300, "cannot read filessssssssssssss");
             }
             else{
-                sendResponse(response, status, content,"../client/index.html");
+                sendResponse(response, status, content,"index.html");
             }
         });
     }
@@ -522,13 +531,15 @@ SillyServer.prototype.httpHandler = function(request, response)
     }
     else
     {
-        if(this.allow_read_files && this.files_folder != null)
-            fs.readFile( this.files_folder + path, function(err, content) {
-                var status = err ? 404 : 200;
-                sendResponse(response, status, content || "file not found", path);
-            });
-        else
-            sendResponse(response, 300, "cannot read files");
+        fs.readFile( __dirname+path, function(err, content) {
+            var status = err ? 404 : 200;
+            if(err){
+                sendResponse(response, status, "file not found");
+            }
+            else{
+                sendResponse(response, status, content,path);
+            }
+        });
     }
 }
 

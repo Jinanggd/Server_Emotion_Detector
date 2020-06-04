@@ -54,7 +54,7 @@
 </body>
 <script>
     var Module = {
-        wasmBinaryFile: './Resources/opencv_js.wasm',
+        wasmBinaryFile: 'client/Resources/opencv_js.wasm',
         preRun: [function() {
             Module.FS_createPreloadedFile('/', 'haarcascade_eye.xml', 'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_eye.xml', true, false);
             Module.FS_createPreloadedFile('/', 'haarcascade_frontalface_default.xml', 'https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml', true, false);
@@ -64,6 +64,6 @@
     };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
-<script async src="./Resources/opencv.js"></script>
-<script src="app.js"></script>
+<script async src="client/Resources/opencv.js"></script>
+<script src="client/app.js"></script>
 </html>

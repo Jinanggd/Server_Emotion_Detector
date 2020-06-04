@@ -247,5 +247,5 @@ function opencvIsReady() {
 
     readyOpenCV.innerHTML = "OpenCV is ready";
 
-    loadEmotionModel('./Resources/model.json');
+    loadEmotionModel('client/Resources/model.json');
 }
