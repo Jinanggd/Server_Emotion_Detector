@@ -169,7 +169,15 @@ function processVideo() {
 }
 
 function drawAndComputeEmotions(ctx, results, color, size) {
+    if(results.length = 0){
+        currentemotion.setDiffTime(new Date());
+        arr_emotions.push(Object.assign({},currentemotion));
+        currentemotion = null;
+        emotionOutput.innerHTML = "Your Emotion is: ";
+        return;
+    }
     for (let i = 0; i < results.length; ++i) {
+        if(i > 1) return;
         let rect = results[i];
         let xRatio = videoWidth/size.width;
         let yRatio = videoHeight/size.height;
