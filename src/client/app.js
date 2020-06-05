@@ -17,7 +17,7 @@ let detectFace = document.getElementById('face');
 let emotionOutput = document.getElementById('Emotion');
 
 var clientws = new SillyClient();
-// clientws.connect(location.host +":8080");
+clientws.connect(location.host );
 
 let currentemotion = null;
 let arr_emotions = [];
@@ -169,7 +169,7 @@ function processVideo() {
 }
 
 function drawAndComputeEmotions(ctx, results, color, size) {
-    if(results.length = 0){
+    if(results.length == 0){
         currentemotion.setDiffTime(new Date());
         arr_emotions.push(Object.assign({},currentemotion));
         currentemotion = null;

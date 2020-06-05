@@ -65,6 +65,7 @@ SillyClient.prototype.connect = function( url, room_name, on_connect, on_message
 
     var final_url = this._final_url = protocol + url + "/" + room_name + params;
 
+    console.log("Connecting to the ws server: "+ this._final_url);
     //connect
     this.socket = new WebSocket( final_url );
     this.socket.binaryType = "arraybuffer";
