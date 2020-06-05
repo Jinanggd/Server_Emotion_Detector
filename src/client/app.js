@@ -16,6 +16,23 @@ let detectFace = document.getElementById('face');
 
 let emotionOutput = document.getElementById('Emotion');
 
+var clientws = new SillyClient();
+// clientws.connect(location.host +":8080");
+
+let currentemotion = null;
+let arr_emotions = [];
+let faceClassifier = null;
+let eyeClassifier = null;
+let profileClassifier = null;
+let EmotionModel = null;
+let emotion_labels = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"];
+
+let canvasInput = null;
+let canvasInputCtx = null;
+
+let canvasBuffer = null;
+let canvasBufferCtx = null;
+
 function startCamera() {
     if (streaming) return;
     //Getting the video data stream
@@ -42,18 +59,6 @@ function startCamera() {
         startVideoProcessing(); // Prints out the stream to the canvas
     }, false);
 }
-
-let faceClassifier = null;
-let eyeClassifier = null;
-let profileClassifier = null;
-let EmotionModel = null;
-let emotion_labels = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"];
-
-let canvasInput = null;
-let canvasInputCtx = null;
-
-let canvasBuffer = null;
-let canvasBufferCtx = null;
 
 //Pretrained Emotion Model
 async function createModel(path){
@@ -183,8 +188,18 @@ function drawAndComputeEmotions(ctx, results, color, size) {
 
                 let index = z.argMax(1).dataSync()[0];
                 let label = emotion_labels[index];
-                if(emotionOutput.innerHTML !== "Your Emotion is: "+label)
-                    emotionOutput.innerHTML = "Your Emotion is: "+label;
+                if(emotionOutput.innerHTML !== "Your Emotion is: "+ label){
+                    if(currentemotion == null){
+                        createEmotion(index,label);
+                    }
+                    else{
+                        currentemotion.setDiffTime(new Date());
+                        arr_emotions.push(Object.assign({},currentemotion));
+                        createEmotion(index,label);
+                    }
+                    emotionOutput.innerHTML = "Your Emotion is: "+ label;
+                }
+
             }
 
         }
@@ -198,6 +213,13 @@ function drawAndComputeEmotions(ctx, results, color, size) {
         ctx.strokeRect(rect.x*xRatio, rect.y*yRatio, rect.width*xRatio, rect.height*yRatio);
         //ctx.fillText(label,rect.x*xRatio,rect.y*yRatio);
     }
+}
+
+function createEmotion(index, label){
+    currentemotion = new emotionRegister();
+    currentemotion.startTime = new Date();
+    currentemotion.id = index;
+    currentemotion.label = label;
 }
 
 function preprocess(imgData){
