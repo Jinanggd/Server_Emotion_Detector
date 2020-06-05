@@ -33,7 +33,7 @@ function SillyServer( server, secure )
         this.server = secure
             ? https.createServer({
                 key:  fs.readFileSync(__dirname + '/server.key'),
-                cert: fs.readFileSync(__dirname + '/server.crt')
+                cert: fs.readFileSync(__dirname + '/server.cert')
             })
             : http.createServer();
     }
@@ -410,7 +410,7 @@ SillyServer.prototype.httpHandler = function(request, response)
     if(path_info.pathname =="/"){
         console.log("Returning Index.html");
 
-        fs.readFile( "index.html", function(err, content) {
+        fs.readFile( __dirname + "/index.html", function(err, content) {
             var status = err ? 404 : 200;
             if(err){
                 sendResponse(response, 300, "cannot read filessssssssssssss");

@@ -10,6 +10,6 @@ if(verbose)
 
 
 //launch the server
-var sillyserver = new SillyServer(null, secure);
+var sillyserver = new SillyServer(null, true);
 sillyserver.verbose = verbose;
 sillyserver.listen( port );
