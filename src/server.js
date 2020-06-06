@@ -1,3 +1,7 @@
+// Arranged version of SillyServer from Javi Agenjo. Github link: https://github.com/jagenjo/SillyServer.js
+
+//ref here: https://github.com/websockets/ws/blob/master/doc/ws.md
+
 function emotion_data_user(ui,un) {
     this.user_id = ui;
     this.user_name = un;
@@ -24,7 +28,6 @@ function emotion_data(em, dur){
     this.dur = dur;
 }
 
-//ref here: https://github.com/websockets/ws/blob/master/doc/ws.md
 var WebSocket = require('ws');
 var WebSocketServer = WebSocket.Server;
 
@@ -209,8 +212,8 @@ SillyServer.prototype.onConnection = function(ws, req)
         console.log("[INFO] Data Received: " + data);
 
         var obj_data = JSON.parse(data);
-        var key = "TFGED-"+obj_data.room+"-"+obj_data.user_name;
-        var emd = new emotion_data(obj_data.label,obj_data.duration);
+        var key = obj_data.room ? "TFGED-"+obj_data.room+"-"+obj_data.user_name : "";
+        var emd = obj_data.label ? new emotion_data(obj_data.label,obj_data.duration) : "";
         switch (obj_data.msg_type) {
             case "INIT":
                 //Store
@@ -248,6 +251,33 @@ SillyServer.prototype.onConnection = function(ws, req)
                 });
                 break;
             case "MASTER":
+                // console.log("Reading all users from room: "+ obj_data.room);
+                var usuarios = {
+                    USERS: []
+                };
+                client_redis.multi()
+                    .keys('*',function(err,replies){
+                        replies.forEach(function(reply,index){
+                            if(reply.toString().includes("TFGED-"+obj_data.room+"-")){
+                                client_redis.get(reply.toString(),function(e,o){
+                                    for(var i = 0; i < room.clients.length; ++i)
+                                    {
+                                        var client = room.clients[i];
+                                        if(client.user_id == obj_data.user_id){
+                                            var header = client.user_id + "|" + "DATA" + "|";
+                                            // console.log("Sending: "+o+"to "+ client.user_id);
+                                            client.send(header+o);
+                                            break;
+                                        }
+                                    }
+                                    usuarios["USERS"].push(o);
+                                });
+                            }
+                        });
+                    })
+                    .exec(function(err,replies){
+
+                    });
                 break;
             default:
                 break;
@@ -265,7 +295,7 @@ SillyServer.prototype.onConnection = function(ws, req)
             }
         }
 
-        this.sendToRoom( ws.room, ws.user_id, is_binary ? "DATA" : "MSG", data, ws.feedback, target_ids );
+         this.sendToRoom( ws.room, ws.user_id, is_binary ? "DATA" : "MSG", data, ws.feedback, target_ids );
 
         if(this.verbose)
             console.log(ws.ip + ' => ' + (is_binary ? "[DATA]" : event.data) );
