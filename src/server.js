@@ -11,18 +11,6 @@ function emotion_data_user(ui,un) {
 
 }
 
-// emotion_data_user.prototype.addEmotionData = function(emd){
-//     this.emotions.push(emd);
-// };
-//
-// emotion_data_user.prototype.setStartDate = function(date){
-//     this.start_date = date.toString();
-// };
-//
-// emotion_data_user.prototype.setEndDate = function(date){
-//     this.end_date = date.toString();
-// };
-
 function emotion_data(em, dur){
     this.emotion = em;
     this.dur = dur;
@@ -49,17 +37,14 @@ function SillyServer( server, secure )
 {
     this.rooms = {}; //existing rooms
     this.clients = []; //connected clients
-    this.db = {}; //to store data
+    this.db = {}; //to store data // UNUSED
     this.last_id = 1; //0 is reserved for server messages
-    this.blacklist = {}; //blacklisted users by ip
 
     this.debug_room = null; //if you enter this room you get all the traffic
 
     this.MAX_BUFFER = 100;
     this.buffering = false; //allow to store last messages to resend to new users
     this.verbose = true;
-    this.allow_read_files = true; //dangerous
-    this.files_folder = "../client"; //set to the folder to server files statically
 
     //create HTTP Server
     this.server = server;
@@ -86,13 +71,12 @@ function SillyServer( server, secure )
     this.on_disconnected = null;
 }
 
-SillyServer.version = "1.3";
 SillyServer.default_port = 8080;
 
 SillyServer.prototype.listen = function( port )
 {
     this.port = port || SillyServer.default_port;
-    console.log('SillyServer v'+SillyServer.version+' listening in port ', this.port);
+    console.log('Server listening in port ', this.port);
     this.server.listen( this.port );
 }
 
@@ -138,14 +122,6 @@ SillyServer.prototype.onConnection = function(ws, req)
     {
         var msg = this.user_id.toString() + "|" + cmd + "|" + data;
         this.send(msg);
-    }
-
-    //check blacklist
-    if(this.blacklist[ws.ip])
-    {
-        console.log("Banned user trying to enter: " + ws.ip);
-        ws.close();
-        return;
     }
 
     //initialize
@@ -209,7 +185,7 @@ SillyServer.prototype.onConnection = function(ws, req)
         var data = event.data;
         var target_ids = null;
 
-        console.log("[INFO] Data Received: " + data);
+        // console.log("[INFO] Data Received: " + data);
 
         var obj_data = JSON.parse(data);
         var key = obj_data.room ? "TFGED-"+obj_data.room+"-"+obj_data.user_name : "";
@@ -282,20 +258,6 @@ SillyServer.prototype.onConnection = function(ws, req)
             default:
                 break;
         }
-
-        //used to targeted messages
-        if(!is_binary && data.length && data[0] == "@")
-        {
-            var header_pos = data.indexOf("|");
-            if(header_pos != -1)
-            {
-                var header = data.substr(1,header_pos-1);
-                target_ids = header.split(",").map(function(v){ return parseInt(v); });
-                data = data.substr(header_pos+1);
-            }
-        }
-
-         this.sendToRoom( ws.room, ws.user_id, is_binary ? "DATA" : "MSG", data, ws.feedback, target_ids );
 
         if(this.verbose)
             console.log(ws.ip + ' => ' + (is_binary ? "[DATA]" : event.data) );
@@ -501,12 +463,8 @@ SillyServer.prototype.httpHandler = function(request, response)
         var content = "text/plain";
         if(pathname)
             content = getContent(pathname);
-        //allow cors
         response.writeHead(status_code, {'Content-Type': content, "Access-Control-Allow-Origin":"*"});
-        // if( typeof(data) == "object")
-        //     response.write( JSON.stringify( data ) );
-        // else
-            response.write( data );
+        response.write( data );
         response.end();
     }
 
@@ -515,9 +473,10 @@ SillyServer.prototype.httpHandler = function(request, response)
     // console.log("REQUEST: "+ request);
     // console.log("URL: " + path);
     // console.log("PATH INFO: "+ path_info.pathname);
+
     //data manipulation
     if(path_info.pathname =="/"){
-        console.log("Returning Index.html");
+        // console.log("Returning Index.html");
 
         fs.readFile( __dirname + "/index.html", function(err, content) {
             var status = err ? 404 : 200;

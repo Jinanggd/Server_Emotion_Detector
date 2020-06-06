@@ -1,5 +1,5 @@
-//SillyClient.js allows to connect to SillyServer.js, more info in https://github.com/jagenjo/SillyServer.js/
-//Javi Agenjo 2015
+// Arranged version of SillyServer from Javi Agenjo. Github link: https://github.com/jagenjo/SillyServer.js
+//SillyClient.js allows to connect to SillyServer.js
 
 function SillyClient()
 {
