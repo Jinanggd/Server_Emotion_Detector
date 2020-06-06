@@ -63,7 +63,7 @@ SillyClient.prototype.connect = function( url, room_name, on_connect, on_message
         protocol = location.protocol == "http:" ? "ws://" : "wss://"; //default protocol
     }
 
-    var final_url = this._final_url = protocol + url + "/" + room_name + params;
+    var final_url = this._final_url = protocol + url + "/ED" + params;
 
     console.log("Connecting to the ws server: "+ this._final_url);
     //connect

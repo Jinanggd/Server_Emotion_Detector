@@ -18,6 +18,7 @@ let emotionOutput = document.getElementById('Emotion');
 
 var clientws = new SillyClient();
 clientws.connect(location.host );
+var initialized = false;
 
 let currentemotion = null;
 let arr_emotions = [];
@@ -172,7 +173,7 @@ function drawAndComputeEmotions(ctx, results, color, size) {
     if(results.length == 0){
         currentemotion.setDiffTime(new Date());
         sendCurrentEmotion();
-        currentemotion = null;
+        createEmotion(-1,"NO FACE","UPDATE");
         emotionOutput.innerHTML = "Your Emotion is: ";
         return;
     }
@@ -198,12 +199,27 @@ function drawAndComputeEmotions(ctx, results, color, size) {
                 let label = emotion_labels[index];
                 if(emotionOutput.innerHTML !== "Your Emotion is: "+ label){
                     if(currentemotion == null){
-                        createEmotion(index,label);
+                        createEmotion(index,label,"INIT");
+                        initialized = true;
+                        // if(initialized){
+                        //     createEmotion(index,label);
+                        //     currentemotion.msg_type = "UPDATE";
+                        // }
+                        // else{
+                        //     currentemotion.msg_type = "INIT";
+                        //     initialized = true;
+                        // }
                     }
+                    // else if (currentemotion.id == -1 ){
+                    //     currentemotion.setDiffTime(new Date());
+                    //     sendCurrentEmotion();
+                    //     createEmotion(index,label,"UPDATE");
+                    //
+                    // }
                     else{
                         currentemotion.setDiffTime(new Date());
                         sendCurrentEmotion();
-                        createEmotion(index,label);
+                        createEmotion(index,label,"UPDATE");
                     }
                     emotionOutput.innerHTML = "Your Emotion is: "+ label;
                 }
@@ -227,13 +243,14 @@ function sendCurrentEmotion(){
     clientws.sendMessage(JSON.stringify(Object.assign({},currentemotion)));
 }
 
-function createEmotion(index, label){
+function createEmotion(index, label,msg_type){
     currentemotion = new emotionRegister();
     currentemotion.startTime = new Date();
     currentemotion.id = index;
     currentemotion.label = label;
     currentemotion.user_id = clientws.user_id;
     currentemotion.user_name = clientws.user_name;
+    currentemotion.msg_type = msg_type;
 }
 
 function preprocess(imgData){
@@ -285,3 +302,18 @@ function opencvIsReady() {
 
     loadEmotionModel('client/Resources/model.json');
 }
+
+//when the page is closed
+window.onbeforeunload = function(){
+    currentemotion.setDiffTime(new Date());
+    currentemotion.msg_type = "END";
+    sendCurrentEmotion();
+    currentemotion = null;
+};
+
+window.onunload = function(){
+    currentemotion.setDiffTime(new Date());
+    currentemotion.msg_type = "END";
+    sendCurrentEmotion();
+    currentemotion = null;
+};

@@ -1,3 +1,29 @@
+function emotion_data_user(ui,un) {
+    this.user_id = ui;
+    this.user_name = un;
+    this.start_date = "";
+    this.end_date = "";
+    this.emotions= [];
+
+}
+
+// emotion_data_user.prototype.addEmotionData = function(emd){
+//     this.emotions.push(emd);
+// };
+//
+// emotion_data_user.prototype.setStartDate = function(date){
+//     this.start_date = date.toString();
+// };
+//
+// emotion_data_user.prototype.setEndDate = function(date){
+//     this.end_date = date.toString();
+// };
+
+function emotion_data(em, dur){
+    this.emotion = em;
+    this.dur = dur;
+}
+
 //ref here: https://github.com/websockets/ws/blob/master/doc/ws.md
 var WebSocket = require('ws');
 var WebSocketServer = WebSocket.Server;
@@ -7,7 +33,13 @@ var fs        = require('fs'),
     https     = require('https'),
     qs		  = require('querystring'),
     url		  = require('url'),
+    redis     = require('redis'), client_redis = redis.createClient();
     util	  = require('util'); //for debug
+
+// Connect to the Redis Database
+client_redis.on("connect", function() {
+    console.log("Server is connected to Redis ...");
+});
 
 //Server
 function SillyServer( server, secure )
@@ -175,6 +207,51 @@ SillyServer.prototype.onConnection = function(ws, req)
         var target_ids = null;
 
         console.log("[INFO] Data Received: " + data);
+
+        var obj_data = JSON.parse(data);
+        var key = "TFGED-"+obj_data.room+"-"+obj_data.user_name;
+        var emd = new emotion_data(obj_data.label,obj_data.duration);
+        switch (obj_data.msg_type) {
+            case "INIT":
+                //Store
+                var emdu = new emotion_data_user(
+                    "TFGED-"+obj_data.room+"-"+obj_data.user_id,
+                    "TFGED-"+obj_data.room+"-"+obj_data.user_name
+                );
+                emdu.start_date = obj_data.startTime;
+                emdu.emotions.push(emd);
+                client_redis.set(key, JSON.stringify(emdu));
+                break;
+            case "UPDATE":
+                // client_redis.hgetall(key, function(err, object) {
+                //     object.emotions.push(emd);
+                //     client_redis.hmset(key,object);
+                // });
+                client_redis.get(key, function(err, reply){
+                    console.log("MESSAGE", reply);
+                    var emdu = JSON.parse(reply);
+                    emdu.emotions.push(emd);
+                    client_redis.set(key,JSON.stringify(emdu));
+                });
+                break;
+            case "END":
+                // client_redis.hgetall(key, function(err, object) {
+                //         object.emotions.push(emd);
+                //         object.end_date = obj_data.endTime;
+                //         client_redis.hmset(key,object);
+                //     });
+                client_redis.get(key, function(err, reply){
+                    var emdu = JSON.parse(reply);
+                    emdu.emotions.push(emd);
+                    emdu.end_date = obj_data.endTime;
+                    client_redis.set(key,JSON.stringify(emdu));
+                });
+                break;
+            case "MASTER":
+                break;
+            default:
+                break;
+        }
 
         //used to targeted messages
         if(!is_binary && data.length && data[0] == "@")
