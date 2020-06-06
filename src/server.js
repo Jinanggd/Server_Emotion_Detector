@@ -158,7 +158,7 @@ SillyServer.prototype.onConnection = function(ws, req)
             ws.send(room.buffer[i]);
 
     //tell all
-    this.sendToRoom(ws.room, ws.user_id, "LOGIN", ws.user_name, true );
+    this.sendToRoom(ws.room, ws.user_id, "LOGIN", ws.user_name, true ); // TODO NO NEED
 
     //ON MESSAGE CALLBACK
     ws.onmessage = (function(event) {
@@ -173,6 +173,8 @@ SillyServer.prototype.onConnection = function(ws, req)
         var is_binary = event.data.constructor !== String;
         var data = event.data;
         var target_ids = null;
+
+        console.log("[INFO] Data Received: " + data);
 
         //used to targeted messages
         if(!is_binary && data.length && data[0] == "@")

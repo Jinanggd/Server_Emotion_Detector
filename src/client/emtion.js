@@ -5,6 +5,8 @@ function emotionRegister() {
     this.endTime; // Date
     this.diffTime; // endtime - starttime
     this.duration; // in seconds round(diffTime/1000)
+    this.user_id;
+    this.user_name;
 
 }
 

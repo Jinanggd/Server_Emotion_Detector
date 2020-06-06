@@ -171,7 +171,7 @@ function processVideo() {
 function drawAndComputeEmotions(ctx, results, color, size) {
     if(results.length == 0){
         currentemotion.setDiffTime(new Date());
-        arr_emotions.push(Object.assign({},currentemotion));
+        sendCurrentEmotion();
         currentemotion = null;
         emotionOutput.innerHTML = "Your Emotion is: ";
         return;
@@ -202,7 +202,7 @@ function drawAndComputeEmotions(ctx, results, color, size) {
                     }
                     else{
                         currentemotion.setDiffTime(new Date());
-                        arr_emotions.push(Object.assign({},currentemotion));
+                        sendCurrentEmotion();
                         createEmotion(index,label);
                     }
                     emotionOutput.innerHTML = "Your Emotion is: "+ label;
@@ -223,11 +223,17 @@ function drawAndComputeEmotions(ctx, results, color, size) {
     }
 }
 
+function sendCurrentEmotion(){
+    clientws.sendMessage(JSON.stringify(Object.assign({},currentemotion)));
+}
+
 function createEmotion(index, label){
     currentemotion = new emotionRegister();
     currentemotion.startTime = new Date();
     currentemotion.id = index;
     currentemotion.label = label;
+    currentemotion.user_id = clientws.user_id;
+    currentemotion.user_name = clientws.user_name;
 }
 
 function preprocess(imgData){
