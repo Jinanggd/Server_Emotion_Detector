@@ -207,7 +207,7 @@ SillyServer.prototype.onConnection = function(ws, req)
                 //     client_redis.hmset(key,object);
                 // });
                 client_redis.get(key, function(err, reply){
-                    console.log("MESSAGE", reply);
+                    // console.log("MESSAGE", reply);
                     var emdu = JSON.parse(reply);
                     emdu.emotions.push(emd);
                     client_redis.set(key,JSON.stringify(emdu));

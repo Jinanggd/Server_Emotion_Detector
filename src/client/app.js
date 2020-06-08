@@ -242,6 +242,8 @@ function drawAndComputeEmotions(ctx, results, color, size) {
 }
 
 function sendCurrentEmotion(){
+    currentemotion.startTime = currentemotion.startTime.toString();
+    currentemotion.endTime = currentemotion.endTime.toString();
     clientws.sendMessage(JSON.stringify(Object.assign({},currentemotion)));
 }
 
