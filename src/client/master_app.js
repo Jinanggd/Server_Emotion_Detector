@@ -61,6 +61,10 @@ btn_visualize.addEventListener('click', function (e) {
         // Finally add to the html
         div_holder.appendChild(div_user_holder);
 
+        var hr = document.createElement("hr");
+
+        div_holder.appendChild(hr);
+
         // var li = document.createElement("li");
         // li.appendChild(document.createTextNode(msg.split("TFGED-"+room+"-").join("")));
         // ul.appendChild(li);
