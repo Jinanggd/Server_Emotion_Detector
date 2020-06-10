@@ -24,10 +24,15 @@ var fs        = require('fs'),
     https     = require('https'),
     qs		  = require('querystring'),
     url		  = require('url'),
-    redis     = require('redis'), client_redis = redis.createClient();
+    redis     = require('redis'),
     util	  = require('util'); //for debug
 
 // Connect to the Redis Database
+// var client_redis = redis.createClient();
+var client_redis = redis.createClient({
+    host: 'redis',
+    port: 6379
+});
 client_redis.on("connect", function() {
     console.log("Server is connected to Redis ...");
 });
